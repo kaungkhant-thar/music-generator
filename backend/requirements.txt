@@ -1,0 +1,6 @@
+transformers
+diffusers
+torch
+boto3
+modal
+pydantic
