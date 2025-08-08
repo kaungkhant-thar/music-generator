@@ -4,6 +4,8 @@ from pydantic import BaseModel
 import uuid
 import base64
 import requests
+from typing import List
+from prompts import PROMPT_GENERATOR_PROMPT, LYRICS_GENERATOR_PROMPT
 
 app = modal.App("music-generator")
 
@@ -25,6 +27,34 @@ model_volume = modal.Volume.from_name("ace-step-models", create_if_missing=True)
 hf_volume = modal.Volume.from_name("qwen-hf-cache", create_if_missing=True)
 
 music_gen_secrets = modal.Secret.from_name("music_gen_secrets")
+
+
+class AudioGenerationBase(BaseModel):
+    audio_duration: float = 180.0
+    seed: int = -1
+    guidance_scale: float = 15.0
+    infer_step: int = 60
+    instrumental: bool = False
+
+
+class GenerateFromDescriptionRequest(BaseModel):
+    full_described_song: str
+
+
+class GenerateWithCustomLyricsRequest(BaseModel):
+    prompt: str
+    lyrics: str
+
+
+class GenerateWithDescribedLyricsRequest(BaseModel):
+    prompt: str
+    described_lyrics: str
+
+
+class GenerateMusicResponseS3(BaseModel):
+    s3_key: str
+    cover_image_s3_key: str
+    categories: List[str]
 
 
 class GenerateMusicResponse(BaseModel):
@@ -99,11 +129,62 @@ class MusicGenServer:
         os.remove(output_path)
         return GenerateMusicResponse(audio_data=audio_b64)
 
+    def prompt_qwen(self, prompt: str):
+        messages = [
+            {"role": "user", "content": prompt},
+        ]
+        text = self.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+        model_inputs = self.tokenizer([text], return_tensors="pt").to(
+            self.llm_model.device
+        )
+
+        generated_ids = self.llm_model.generate(
+            model_inputs.input_ids, max_new_tokens=512
+        )
+        generated_ids = [
+            output_ids[len(input_ids) :]
+            for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+        ]
+
+        response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[
+            0
+        ]
+        return response
+
+    def generate_prompt(self, description: str):
+        # insert into template
+        full_prompt = PROMPT_GENERATOR_PROMPT.format(user_prompt=description)
+        # run llm inference and return that
+        return self.prompt_qwen(full_prompt)
+
+    def generate_lyrics(self, description: str):
+        # insert into template
+        full_prompt = LYRICS_GENERATOR_PROMPT.format(description=description)
+        # run llm inference and return that
+        return self.prompt_qwen(full_prompt)
+
+    @modal.fastapi_endpoint(method="POST")
+    def generate_from_description(self) -> GenerateMusicResponse:
+        # generate prompt
+
+        # generate lyrics
+        pass
+
+    @modal.fastapi_endpoint(method="POST")
+    def generate_with_lyrics(self) -> GenerateMusicResponse:
+        pass
+
+    @modal.fastapi_endpoint(method="POST")
+    def generate_with_described_lyrics(self) -> GenerateMusicResponse:
+        # generate lyrics
+        pass
+
 
 @app.local_entrypoint()
 def main():
     server = MusicGenServer()
-    print(server, server.generate)
     endpoint_url = server.generate.get_web_url()
     response = requests.post(endpoint_url)
     response.raise_for_status()
