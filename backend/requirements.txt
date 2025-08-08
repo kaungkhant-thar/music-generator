@@ -4,3 +4,4 @@ torch
 boto3
 modal
 pydantic
+accelerate
