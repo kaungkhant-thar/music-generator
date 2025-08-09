@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { generateSong, type GenerateRequest } from "@/actions/generation";
-import { authClient } from "@/lib/auth-client";
 
 const inspirationTags = [
   "80s synth-pop",
@@ -33,7 +32,6 @@ const styleTags = [
 ];
 
 export function SongPanel({ credits }: { credits: number }) {
-  console.log({ credits });
   const [mode, setMode] = useState<"simple" | "custom">("simple");
   const [description, setDescription] = useState("");
   const [instrumental, setInstrumental] = useState(false);
@@ -41,8 +39,6 @@ export function SongPanel({ credits }: { credits: number }) {
   const [lyrics, setLyrics] = useState("");
   const [styleInput, setStyleInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const session = authClient.useSession();
-  console.log({ session });
 
   const handleStyleInputTagClick = (tag: string) => {
     const currentTags = styleInput
