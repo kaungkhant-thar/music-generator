@@ -32,7 +32,7 @@ music_gen_secrets = modal.Secret.from_name("music_gen_secrets")
 
 
 class AudioGenerationBase(BaseModel):
-    audio_duration: float = 180.0
+    audio_duration: float = 150.0
     seed: int = -1
     guidance_scale: float = 15.0
     infer_step: int = 60
