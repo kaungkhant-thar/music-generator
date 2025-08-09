@@ -2,7 +2,5 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.formatOnSave": true
-  },
-  // Optional: use bundled Black or your own
-  "black-formatter.importStrategy": "useBundled"
+  }
 }
