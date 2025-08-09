@@ -25,6 +25,7 @@ export async function generateSong(generateRequest: GenerateRequest) {
 
   if (!session) redirect("/auth/sign-in");
 
+  //   await queueSong(generateRequest, 7.5, session.user.id);
   await queueSong(generateRequest, 15, session.user.id);
 
   revalidatePath("/create");
@@ -67,12 +68,15 @@ export async function getPlayUrl(songId: string) {
     headers: await headers(),
   });
 
-  if (!session) redirect("/auth/sign-in");
-
   const song = await db.song.findUniqueOrThrow({
     where: {
       id: songId,
-      OR: [{ userId: session.user.id }, { published: true }],
+
+      ...(session
+        ? {
+            OR: [{ userId: session.user.id }, { published: true }],
+          }
+        : { published: true }),
       s3Key: {
         not: null,
       },

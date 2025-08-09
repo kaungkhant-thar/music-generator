@@ -3,6 +3,7 @@
 import { Home, Music } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
+import Link from "next/link";
 
 export default function SidebarMenuItems() {
   const path = usePathname();
@@ -32,10 +33,10 @@ export default function SidebarMenuItems() {
       {items.map((item) => (
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton asChild isActive={item.active}>
-            <a href={item.url}>
+            <Link href={item.url}>
               <item.icon />
               <span>{item.title}</span>
-            </a>
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       ))}

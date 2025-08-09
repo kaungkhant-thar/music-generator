@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { generateSong, type GenerateRequest } from "@/actions/generation";
+import { authClient } from "@/lib/auth-client";
 
 const inspirationTags = [
   "80s synth-pop",
@@ -31,7 +32,8 @@ const styleTags = [
   "Ambient pads",
 ];
 
-export function SongPanel() {
+export function SongPanel({ credits }: { credits: number }) {
+  console.log({ credits });
   const [mode, setMode] = useState<"simple" | "custom">("simple");
   const [description, setDescription] = useState("");
   const [instrumental, setInstrumental] = useState(false);
@@ -39,6 +41,8 @@ export function SongPanel() {
   const [lyrics, setLyrics] = useState("");
   const [styleInput, setStyleInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const session = authClient.useSession();
+  console.log({ session });
 
   const handleStyleInputTagClick = (tag: string) => {
     const currentTags = styleInput
@@ -261,7 +265,7 @@ export function SongPanel() {
       <div className="border-t p-4">
         <Button
           onClick={handleCreate}
-          disabled={loading}
+          disabled={loading || credits < 1}
           className="w-full cursor-pointer bg-gradient-to-r from-orange-500 to-pink-500 font-medium text-white hover:from-orange-600 hover:to-pink-600"
         >
           {loading ? <Loader2 className="animate-spin" /> : <Music />}
