@@ -29,8 +29,6 @@ export default async function Page() {
     take: 100,
   });
 
-  console.log({ songs });
-
   const songsWithUrls = await Promise.all(
     songs.map(async (song) => {
       const thumbnailUrl = song.thumbnailS3Key
