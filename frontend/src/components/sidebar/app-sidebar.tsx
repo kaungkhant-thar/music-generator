@@ -1,6 +1,6 @@
 "use server";
 
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton, SignedIn } from "@daveyplate/better-auth-ui";
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +12,6 @@ import {
 } from "../ui/sidebar";
 import { Credits } from "./credits";
 import SidebarMenuItems from "./sidebar-menu-items";
-import { User } from "lucide-react";
 
 export async function AppSidebar() {
   return (
@@ -34,16 +33,9 @@ export async function AppSidebar() {
         <div className="mb-2 flex w-full items-center justify-center gap-1 text-xs">
           <Credits />
         </div>
-        <UserButton
-          variant="outline"
-          additionalLinks={[
-            {
-              label: "Customer Portal",
-              href: "/customer-portal",
-              icon: <User />,
-            },
-          ]}
-        />
+        <SignedIn>
+          <UserButton variant="outline" />
+        </SignedIn>
       </SidebarFooter>
     </Sidebar>
   );
